@@ -43,13 +43,18 @@ def login():
             # passed to the login_user() method.
             user = UserProfile.query.filter_by(username=username, password=password).first()
            
-            # get user id, load into session
-            login_user(user)
+            if user is not None:
+               
+                # get user id, load into session
+                login_user(user)
 
-            # remember to flash a message to the user
-            flash("Login successful.", 'success')
+                # remember to flash a message to the user
+                flash("You made it in!", 'success')
             
-            return redirect(url_for("secure_page")) # they should be redirected to a secure-page route instead
+                return redirect(url_for("secure_page")) # they should be redirected to a secure-page route instead
+            else:
+                flash('Username or Password incorrect.', 'danger')
+                
     return render_template("login.html", form=form)
 
 # user_loader callback. This callback is used to reload the user object from
@@ -58,10 +63,21 @@ def login():
 def load_user(id):
     return UserProfile.query.get(int(id))
     
-@app.route("/secure-page")
+@app.route('/secure-page/')
 @login_required
 def secure_page():
+    """Render a secure page on our website that only logged in users can access."""
     return render_template('secure_page.html')
+
+@app.route("/logout")
+@login_required
+def logout():
+    # logout user and end session
+    logout_user()
+    # flash message to user
+    flash('Logged out.', 'danger')
+    # redirect to the home route
+    return redirect(url_for('home'))
 
 ###
 # The functions below should be applicable to all Flask apps.

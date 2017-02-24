@@ -32,7 +32,7 @@ def login():
     if request.method == "POST":
         # change this to actually validate the entire form submission
         # and not just one field
-        if form.validate_on_submit(form):
+        if form.validate_on_submit():
             # Get the username and password values from the form.
             username = form.username.data
             password = form.password.data
@@ -47,9 +47,9 @@ def login():
             login_user(user)
 
             # remember to flash a message to the user
-            flash("Login successful.")
+            flash("Login successful.", 'success')
             
-            return redirect(url_for("secure-page")) # they should be redirected to a secure-page route instead
+            return redirect(url_for("secure_page")) # they should be redirected to a secure-page route instead
     return render_template("login.html", form=form)
 
 # user_loader callback. This callback is used to reload the user object from
@@ -57,6 +57,11 @@ def login():
 @login_manager.user_loader
 def load_user(id):
     return UserProfile.query.get(int(id))
+    
+@app.route("/secure-page")
+@login_required
+def secure_page():
+    return render_template('secure_page.html')
 
 ###
 # The functions below should be applicable to all Flask apps.
@@ -67,7 +72,6 @@ def send_text_file(file_name):
     """Send your static text file."""
     file_dot_text = file_name + '.txt'
     return app.send_static_file(file_dot_text)
-
 
 @app.after_request
 def add_header(response):
